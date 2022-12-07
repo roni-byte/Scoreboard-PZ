@@ -1,3 +1,4 @@
+import binascii
 
 buffer_1 = """0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x9f, 0xff, 0xff, 0xfe, 0x1f, 0xff, 
 0xff, 0xf8, 0x1f, 0xff, 0xff, 0xe0, 0x1f, 0xff, 0xff, 0x80, 0x1f, 0xff, 0xff, 0x78, 0x1f, 0xff, 
@@ -153,27 +154,23 @@ buffer_9 = """0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x1f, 
 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff"""
 
 
-def convertion_to_py_bytearray(byte_arrays):
-    answer = []
-    help_array = byte_arrays.split(", ")
-    for element in help_array:
-        if element == ", ":
-            help_array.remove(element)
-    for element in help_array:
-        if len(element) == 4:
-            answer.append(element[1::])
+def conversion_to_bytearray(buffer):
+    help_array = buffer.split(", ")
+    new_array = []
+    for num in help_array:
+        if num.startswith("\n"):
+            new_array.append(num[3:]) # "\n as one character"
         else:
-            answer.append(element[2::])
-    if len(answer) != 256:
-        print("Something might have gone wrong...")
-    return "\\" + "\\".join(answer)
+            new_array.append(num[2:])
+    return " ".join(new_array).replace(" ", "")
 
-buffer_1_py = convertion_to_py_bytearray(buffer_1) 
-buffer_2_py = convertion_to_py_bytearray(buffer_2) 
-buffer_3_py = convertion_to_py_bytearray(buffer_3) 
-buffer_4_py = convertion_to_py_bytearray(buffer_4) 
-buffer_5_py = convertion_to_py_bytearray(buffer_5) 
-buffer_6_py = convertion_to_py_bytearray(buffer_6) 
-buffer_7_py = convertion_to_py_bytearray(buffer_7) 
-buffer_8_py = convertion_to_py_bytearray(buffer_8) 
-buffer_9_py = convertion_to_py_bytearray(buffer_9)
+
+buffer_1 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_1)))
+buffer_2 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_2)))
+buffer_3 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_3)))
+buffer_4 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_4)))
+buffer_5 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_5)))
+buffer_6 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_6)))
+buffer_7 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_7)))
+buffer_8 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_8)))
+buffer_9 = bytearray(binascii.unhexlify(conversion_to_bytearray(buffer_9)))
