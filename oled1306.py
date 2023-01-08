@@ -33,6 +33,6 @@ def oled1306_print_result(oled_passed: "SSD1306_I2C", buffer1, buffer2):
     oled_passed.invert(1)
     oled_passed.show()
 
-oled1306_print_result(oled, byte_arrays.buffer_1, byte_arrays.buffer_1)
+oled1306_print_result(oled, byte_arrays.buffer_0, byte_arrays.buffer_4)
 #sprawdz buffer_0
 
