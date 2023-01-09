@@ -2,6 +2,7 @@ from machine import Pin, SoftI2C
 from ssd1306 import SSD1306_I2C
 import framebuf
 import byte_arrays
+import time
 
 
 """
@@ -21,6 +22,14 @@ def oled1306_configuration(scl_pin=22, sda_pin=21):
 
 oled = oled1306_configuration()
 
+
+def show_single_number(oled_passed: "SSD1306_I2C", buffer1):
+    oled_passed.fill(0)
+    fb = framebuf.FrameBuffer(buffer1, 32, 64, framebuf.MONO_HLSB)
+    oled_passed.framebuf.blit(fb, 48, 0)
+    oled_passed.show()
+
+
 def oled1306_print_result(oled_passed: "SSD1306_I2C", buffer1, buffer2):
     fb = framebuf.FrameBuffer(buffer1, 32, 64, framebuf.MONO_HLSB)
     fb2 = framebuf.FrameBuffer(buffer2, 32, 64, framebuf.MONO_HLSB)
@@ -30,9 +39,8 @@ def oled1306_print_result(oled_passed: "SSD1306_I2C", buffer1, buffer2):
     oled_passed.framebuf.blit(fb2, 96, 0)
     oled_passed.framebuf.blit(fb3, 32, 0)
 
-    oled_passed.invert(1)
     oled_passed.show()
 
-oled1306_print_result(oled, byte_arrays.buffer_0, byte_arrays.buffer_4)
-#sprawdz buffer_0
+# oled1306_print_result(oled, byte_arrays.buffer_0, byte_arrays.buffer_4)
+show_single_number(oled, byte_arrays.buffer_0)
 
