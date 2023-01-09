@@ -1,6 +1,9 @@
 from machine import Pin, SoftI2C, ADC
 import SSD1306_OLED
 import time
+from play_game_hcsr04 import who_scored
+from oled1306 import show_single_number, oled1306_print_result
+import byte_arrays
 
 
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
@@ -8,6 +11,10 @@ i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 oled_width = 128
 oled_height = 64
 oled = SSD1306_OLED.SSD1306_I2C(oled_width, oled_height, i2c)
+num_buffors = [
+    byte_arrays.buffer_0, byte_arrays.buffer_1, byte_arrays.buffer_2, byte_arrays.buffer_3, byte_arrays.buffer_4,
+    byte_arrays.buffer_5, byte_arrays.buffer_6, byte_arrays.buffer_7, byte_arrays.buffer_8, byte_arrays.buffer_9
+              ]
 
 
 def clear_screen():
@@ -262,6 +269,34 @@ def menu():
     time.sleep_ms(7000)
 
 
+def play_game(max_points):
+    left = 0
+    right = 0
+    oled1306_print_result(oled, num_buffors[0], num_buffors[0])
+    for i in range(max_points):
+        scored_gate_pos = who_scored()
+        if (scored_gate_pos == 'left'):
+            left += 1
+        if (scored_gate_pos == 'right'):
+            right += 1
+        clear_screen()
+        oled.text('GOAL !!', 40, 20)
+        oled.show()
+        time.sleep_ms(500)
+        clear_screen()
+        oled.text('ROUND', 40, 20)
+        oled.text(str(i+2), 50, 40)
+        oled.show()
+        time.sleep_ms(500)
+        oled1306_print_result(oled, num_buffors[left], num_buffors[right])
+        time.sleep_ms(500)
+    clear_screen()
+    oled.text('GAME OVER', 20, 20)
+    oled.show()
+    time.sleep_ms(500)
+    show_beginning_screen()
+
+
 def start_game():
     clear_screen()
     oled.text('READY ?', 40, 20)
@@ -274,15 +309,16 @@ def start_game():
         oled.text('START', 40, 0)
         oled.text('IN', 50, 10)
         oled.show()
-        time.sleep_ms(300)
+        time.sleep_ms(1000)
         for i in range(4, 0, -1):
-            oled.fill_rect(0, 40, 128, 60, 0)
-            oled.text(str(i), 55, 40)
-            oled.show()
+            show_single_number(oled, num_buffors[i])
             time.sleep_ms(1000)
         clear_screen()
         oled.text('GO !!', 40, 20)
         oled.show()
+        time.sleep_ms(500)
+        clear_screen()
+        play_game(3)
         time.sleep_ms(500)
     else:
         show_beginning_screen()
@@ -313,8 +349,9 @@ def show_beginning_screen():
 
 # oled.invert(True)
 
-# game_logo()
+game_logo()
 show_beginning_screen()
+# start_game()
 
 # game_mode()
 # settings()
