@@ -98,7 +98,7 @@ def max7219_show_functionalities(sck_pin=18, mosi_pin=23, cs_pin=5):
         sleep(2)
 
 
-# display = max7219_configuration()
-# max7219_time_is_up(display)
+display = max7219_configuration()
+max7219_time_is_up(display)
 
-# max7219_show_functionalities()
+max7219_show_functionalities()
