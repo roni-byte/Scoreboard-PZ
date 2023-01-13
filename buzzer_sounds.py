@@ -25,8 +25,8 @@ class Buzzer:
                 self.pwm.duty(0)
                 # print('SILENCE')
             else:
-                self.pwm.freq(notes_dic[note])
                 self.pwm.duty(active_duty)
+                self.pwm.freq(notes_dic[note])
             time.sleep_ms(delay)
         self.pwm.duty(0)
         self.pwm.deinit()
@@ -68,9 +68,10 @@ fail_song = [
     'D6', 'D6', 'D6', 'CS6', 'CS6', 'CS6', 'C6', 'C6', 'C6', 'C6', '0'
 ]
 
+silence = ['0']
 
 # buzzer = Buzzer(15)
-# buzzer = Buzzer(33)
+# buzzer = Buzzer(23)
 
-buzzer.play(win_song, 200,)
+# buzzer.play(win_song, 200)
 

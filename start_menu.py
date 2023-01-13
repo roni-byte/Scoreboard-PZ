@@ -1,18 +1,20 @@
-from machine import Pin, SoftI2C, ADC
+from machine import Pin, SoftI2C, ADC, mem32
+import machine
 import ssd1306
 from play_game_hcsr04 import who_scored
 from oled1306 import show_single_number, oled1306_print_result
 import buzzer_sounds
 import byte_arrays
 import time
-
+import leds
+# import stm32lib
 
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 
 oled_width = 128
 oled_height = 64
 oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
-# buzzer = buzzer_sounds.Buzzer(33)
+buzzer = buzzer_sounds.Buzzer(32)
 num_buffors = [
     byte_arrays.buffer_0, byte_arrays.buffer_1, byte_arrays.buffer_2, byte_arrays.buffer_3, byte_arrays.buffer_4,
     byte_arrays.buffer_5, byte_arrays.buffer_6, byte_arrays.buffer_7, byte_arrays.buffer_8, byte_arrays.buffer_9
@@ -43,17 +45,31 @@ def game_logo():
     clear_screen()
 
 
+def disableADC():
+    # mem32[0x3FF4880C] &= 0xFFF3FFFF
+    # mem32[0x3FF4880C] |= 0x00020000
+    mem32[0x3FF4880C] = 0
+
+
 def where_is_joystick():
     x_center = 1872
     y_center = 1515
+    # adc = machine.ADC(Pin(2))
+    # apin = ADC.channel(pin='GPIO2')
     x = ADC(Pin(15, Pin.IN))
     y = ADC(Pin(2, Pin.IN))
+    # y = apin
     x.atten(ADC.ATTN_11DB)
     y.atten(ADC.ATTN_11DB)
 
     # print(f'Current position: {x_val}, {y_val}')
     x_val = x.read()
     y_val = y.read()
+    x = ADC(0)
+    y = ADC(0)
+
+    # adc.deinit()
+    # disableADC()
     if (x_val < x_center - 10):
         # print('left')
         return 'left'
@@ -262,6 +278,7 @@ class Menu_options():
 
     def start_game(self):
         clear_screen()
+        # buzzer.play(buzzer_sounds.silence, 200)
         oled.text('READY ?', 40, 20)
         oled.text('  YES      NO', 0, 40)
         oled.show()
@@ -273,19 +290,117 @@ class Menu_options():
             oled.text('IN', 50, 10)
             oled.show()
             time.sleep_ms(1000)
-            for i in range(4, 0, -1):
+            leds_types = [leds.ledR, leds.ledY, leds.ledY]
+            for i in range(3, 0, -1):
                 show_single_number(oled, num_buffors[i])
+                leds_types[i % 3].on()
+                time.sleep_ms(1000)
+                leds_types[i % 3].off()
                 time.sleep_ms(1000)
             clear_screen()
             oled.text('GO !!', 40, 20)
             oled.show()
+            leds.miga(leds.ledG, 1)
             time.sleep_ms(500)
             clear_screen()
-            play_games(self.fights, self.points)
+            self.play_games(self.fights, self.points)
             time.sleep_ms(500)
         else:
             show_beginning_screen()
 
+    def play_games(self, rounds, max_points):
+        left = 0
+        right = 0
+        for i in range(rounds):
+            round_winner = self.play_game(max_points)
+            if (round_winner == 'left'):
+                left += 1
+            if (round_winner == 'right'):
+                right += 1
+            if (i < rounds-1):
+                oled.text(f'FIGHT {i+2}', 30, 0)
+                oled.text(' fights won:', 0, 20)
+                oled.text(f'{left} : {right}', 30, 40)
+                oled.show()
+                time.sleep_ms(2000)
+                clear_screen()
+
+        clear_screen()
+        # if (self.are_sounds_on):
+            # buzzer.play(buzzer_sounds.win_song, 200)
+        oled.text('GAME OVER', 20, 0)
+        oled.text('Winner is player:', 0, 20)
+        if (right > left):
+            oled.text('on the RIGHT', 0, 40)
+        if (left > right):
+            oled.text('on the LEFT', 0, 40)
+        if (left == right):
+            oled.text('NONE you tied', 0, 40)
+        oled.show()
+        leds.flash_all_leds()
+        time.sleep_ms(1000)
+        leds.flash_all_leds()
+        time.sleep_ms(5000)
+        show_beginning_screen()
+
+    def play_game(self, max_points):
+        left = 0
+        right = 0
+        oled1306_print_result(oled, num_buffors[0], num_buffors[0])
+        for i in range(max_points):
+            scored_gate_pos = who_scored(left, right)
+
+            # if button was pressed, add value and continue waiting for goal
+            if (scored_gate_pos == 'left_button'):
+                left += 1
+                scored_gate_pos = who_scored(left, right)
+            if (scored_gate_pos == 'right_button'):
+                right += 1
+                scored_gate_pos = who_scored(left, right)
+
+            if (scored_gate_pos == 'left'):
+                left += 1
+            if (scored_gate_pos == 'right'):
+                right += 1
+            clear_screen()
+            oled.text('GOAL !!', 40, 20)
+            oled.show()
+            # leds.miga(leds.ledY, 2)
+            leds.flash_all_leds()
+            time.sleep_ms(500)
+            clear_screen()
+            if (i < max_points-1):
+                oled.text('ROUND', 40, 20)
+                oled.text(str(i+2), 50, 40)
+                oled.show()
+            time.sleep_ms(500)
+            oled1306_print_result(oled, num_buffors[left], num_buffors[right])
+            time.sleep_ms(500)
+        clear_screen()
+        # if (self.are_sounds_on):
+        # buzzer.play(buzzer_sounds.win_song, 200)
+        oled.text('FIGHT OVER', 20, 0)
+        oled.text('Fight won player:', 0, 20)
+        if (right > left):
+            oled.text('on the RIGHT', 0, 40)
+            oled.show()
+            leds.miga(leds.ledG, 2)
+        if (left > right):
+            oled.text('on the LEFT', 0, 40)
+            oled.show()
+            leds.miga(leds.ledR, 2)
+        if (left == right):
+            oled.text('NONE you tied', 0, 40)
+            oled.show()
+            leds.miga(leds.ledY, 2)
+        time.sleep_ms(5000)
+        clear_screen()
+        if (right == max_points):
+            return 'right'
+        if (left == max_points):
+            return 'left'
+        else:
+            return 'tie'
 
 def menu():
     clear_screen()
@@ -312,78 +427,10 @@ def menu():
     time.sleep_ms(7000)
 
 
-def play_games(rounds, max_points):
-    left = 0
-    right = 0
-    for i in range(rounds):
-        round_winner = play_game(max_points)
-        if (round_winner == 'left'):
-            left += 1
-        if (round_winner == 'right'):
-            right += 1
-        if (i < rounds-1):
-            oled.text(f'FIGHT {i+2}', 30, 0)
-            oled.text('fights won:', 0, 20)
-            oled.text(f'{left} : {right}', 10, 40)
-            oled.show()
-            time.sleep_ms(2000)
-            clear_screen()
-
-    clear_screen()
-    oled.text('GAME OVER', 20, 0)
-    oled.text('Winner is player:', 0, 20)
-    if (right > left):
-        oled.text('on the RIGHT', 0, 40)
-    if (left > right):
-        oled.text('on the LEFT', 0, 40)
-    if (left == right):
-        oled.text('NONE players tied', 0, 40)
-    oled.show()
-    time.sleep_ms(5000)
-    show_beginning_screen()
-
-
-def play_game(max_points):
-    left = 0
-    right = 0
-    oled1306_print_result(oled, num_buffors[0], num_buffors[0])
-    for i in range(max_points):
-        scored_gate_pos = who_scored(left, right)
-        if (scored_gate_pos == 'left'):
-            left += 1
-        if (scored_gate_pos == 'right'):
-            right += 1
-        clear_screen()
-        oled.text('GOAL !!', 40, 20)
-        oled.show()
-        time.sleep_ms(500)
-        clear_screen()
-        if (i < max_points-1):
-            oled.text('ROUND', 40, 20)
-            oled.text(str(i+2), 50, 40)
-            oled.show()
-        time.sleep_ms(500)
-        oled1306_print_result(oled, num_buffors[left], num_buffors[right])
-        time.sleep_ms(500)
-    clear_screen()
-    oled.text('FIGHT OVER', 20, 0)
-    oled.text('Fight won player:', 0, 20)
-    if (right > left):
-        oled.text('on the RIGHT', 0, 40)
-    if (left > right):
-        oled.text('on the LEFT', 0, 40)
-    if (left == right):
-        oled.text('NONE players tied', 0, 40)
-    oled.show()
-    time.sleep_ms(5000)
-    clear_screen()
-    if (right == max_points):
-        return 'right'
-    else:
-        return 'left'
-
 
 def show_beginning_screen():
+    # buzzer.play(buzzer_sounds.melody4, 200)
+    # buzzer.play(buzzer_sounds.silence, 200)
     clear_screen()
     oled.text('CAR SOCCER', 25, 0)
     oled.text(' -------------- ', 0, 6)
@@ -409,12 +456,18 @@ def show_beginning_screen():
 # oled.invert(True)
 
 # game_logo()
-# start_game()
 # play_game(3)
 # game_mode()
 # settings()
 
 menu_options = Menu_options(2, 3)
-show_beginning_screen()
+# menu_options.start_game()
+# show_beginning_screen()
+# menu_options.play_game(3)
+# buzzer.play(buzzer_sounds.silence, 200)
+buzzer.play(buzzer_sounds.win_song, 200)
+print(where_is_joystick())
+buzzer.play(buzzer_sounds.win_song, 200)
+
 
 clear_screen()
