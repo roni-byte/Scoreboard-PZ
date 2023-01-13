@@ -72,5 +72,5 @@ fail_song = [
 # buzzer = Buzzer(15)
 buzzer = Buzzer(33)
 
-buzzer.play(win_song, 200,)
+buzzer.play(fail_song, 200,)
 

@@ -274,7 +274,7 @@ def play_game(max_points):
     right = 0
     oled1306_print_result(oled, num_buffors[0], num_buffors[0])
     for i in range(max_points):
-        scored_gate_pos = who_scored()
+        scored_gate_pos = who_scored(left, right)
         if (scored_gate_pos == 'left'):
             left += 1
         if (scored_gate_pos == 'right'):
