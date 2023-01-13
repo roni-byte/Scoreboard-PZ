@@ -1,6 +1,6 @@
 from machine import Pin, SoftI2C, ADC
 from hcsr04 import HCSR04
-import SSD1306_OLED
+# import SSD1306_OLED
 import time
 
 DELAY = 5  # number of seconds between goals
@@ -11,7 +11,7 @@ i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 
 oled_width = 128
 oled_height = 64
-oled = SSD1306_OLED.SSD1306_I2C(oled_width, oled_height, i2c)
+# oled = SSD1306_OLED.SSD1306_I2C(oled_width, oled_height, i2c)
 import time
 
 sensor_right = HCSR04(trigger_pin=5, echo_pin=18, echo_timeout_us=10000)
