@@ -6,7 +6,6 @@ import buzzer_sounds
 import byte_arrays
 import time
 
-
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 
 oled_width = 128
@@ -349,6 +348,15 @@ def play_game(max_points):
     oled1306_print_result(oled, num_buffors[0], num_buffors[0])
     for i in range(max_points):
         scored_gate_pos = who_scored(left, right)
+
+        # if button was pressed, add value and continue waiting for goal
+        if (scored_gate_pos == 'left_button'):
+            left += 1
+            scored_gate_pos = who_scored(left, right)
+        if (scored_gate_pos == 'right_button'):
+            right += 1
+            scored_gate_pos = who_scored(left, right)
+
         if (scored_gate_pos == 'left'):
             left += 1
         if (scored_gate_pos == 'right'):

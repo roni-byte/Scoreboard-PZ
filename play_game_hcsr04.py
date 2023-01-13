@@ -4,6 +4,8 @@ import SSD1306_OLED
 import time
 
 DELAY = 5  # number of seconds between goals
+push_button_left = Pin(13, Pin.IN)
+push_button_right = Pin(14, Pin.IN)
 
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 
@@ -24,6 +26,18 @@ def who_scored(left=1, right=1):
     while True:
         distance_right = sensor_right.distance_cm()
         distance_left = sensor_left.distance_cm()
+
+        try:
+            logic_state_left_button = push_button_left.value()
+            if logic_state_left_button is True:
+                return "left_button"
+
+            logic_state_right_button = push_button_right.value()
+            if logic_state_right_button is True:
+                return "right_button"
+        except:
+            pass
+
         if (distance_right < 5 and distance_right > 0):
             if left == 0 and right == 0:
                 return 'right'
