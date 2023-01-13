@@ -99,6 +99,21 @@ class SSD1306:
     def text(self, string, x, y, col=1):
         self.framebuf.text(string, x, y, col)
 
+    def vline(self, x, y, h, col):
+        self.framebuf.vline(x, y, h, col)
+
+    def line(self, x1, y1, x2, y2, col):
+        self.framebuf.line(x1, y1, x2, y2, col)
+
+    def rect(self, x, y, w, h, col):
+        self.framebuf.rect(x, y, w, h, col)
+
+    def fill_rect(self, x, y, w, h, col):
+        self.framebuf.fill_rect(x, y, w, h, col)
+
+    def blit(self, fbuf, x, y):
+        self.framebuf.blit(fbuf, x, y)
+
 
 class SSD1306_I2C(SSD1306):
     def __init__(self, width, height, i2c, addr=0x3c, external_vcc=False):

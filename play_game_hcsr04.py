@@ -24,16 +24,8 @@ def who_scored(left=1, right=1):
     while True:
         distance_right = sensor_right.distance_cm()
         distance_left = sensor_left.distance_cm()
-        if (distance_right < 5):
-            if left == 0 and right == 0:
-                return 'right'
-            end = time.time()
-            elapsed_time = end - start
-            if elapsed_time > DELAY:
-                return 'right'
-            else:
-                print(
-                    "Goal detected, but delay between last goal was too small")
+        if (distance_right < 5 and distance_right > 0):
+            return 'right'
         # if (distance_left < 5):
         #      return 'left'
 
@@ -42,4 +34,4 @@ def who_scored(left=1, right=1):
 
         time.sleep_ms(200)
 
-# print(who_has_goal())
+# print(who_scored())
