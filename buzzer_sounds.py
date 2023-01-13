@@ -19,7 +19,7 @@ class Buzzer:
         self.buzzer = machine.Pin(signed_pin, machine.Pin.OUT)
         self.pwm = machine.PWM(self.buzzer)
 
-    def play(self, notes, delay, active_duty=200):
+    def play(self, notes, delay=200, active_duty=200):
         for note in notes:
             if (note == '0'):  # Special case for silence
                 self.pwm.duty(0)
@@ -32,10 +32,12 @@ class Buzzer:
         self.pwm.deinit()
         return
 
-    def buzzing(self, amount, delay=200):
+    def buzzing(self, amount, delay=500):
         for i in range(amount):
+            self.pwm.duty(200)
             self.buzzer.value(1)
             time.sleep_ms(delay)
+            self.pwm.duty(0)
             self.buzzer.value(0)
             time.sleep_ms(delay)
         self.pwm.duty(0)
@@ -44,7 +46,7 @@ class Buzzer:
 
 melody1 = ['G7', '0', 'G7', '0', 'G7']
 melody2 = ['D5', '0', 'D5']
-melody3 = ['D2', '0', 'D2']
+menu_wrong_sound = ['D2', '0', 'D2']
 melody4 = ['B6', '0', 'B6', '0', 'B6', 'B6', 'B6', '0', 'B6', 'B6', '0', 'B6', 'B6']
 
 song_test = [
@@ -67,10 +69,12 @@ win_song = [
 fail_song = [
     'D6', 'D6', 'D6', 'CS6', 'CS6', 'CS6', 'C6', 'C6', 'C6', 'C6', '0'
 ]
-
+menu_sound = ['D5', '0']
+silence = ['0']
 
 # buzzer = Buzzer(15)
-buzzer = Buzzer(33)
+# buzzer = Buzzer(33)
 
-buzzer.play(win_song, 200,)
+# buzzer.play(win_song, 200)
+# buzzer.buzzing(3)
 

@@ -20,14 +20,15 @@ def who_scored():
     while True:
         distance_right = sensor_right.distance_cm()
         distance_left = sensor_left.distance_cm()
-        if (distance_right < 5):
+        if (distance_right < 5 and distance_right > 0):
+            # print('right')
             return 'right'
-        # if (distance_left < 5):
-        #      return 'left'
+        if (distance_left < 5 and distance_left > 0):
+             return 'left'
 
         # print('Distance:', distance_right, 'cm')
         # print('Distance:', distance_left, 'cm')
 
         time.sleep_ms(200)
 
-# print(who_has_goal())
+# print(who_scored())
