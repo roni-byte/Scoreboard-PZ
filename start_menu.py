@@ -395,7 +395,6 @@ def show_beginning_screen():
     oled.text('START   MENU', 10, 45)
     oled.show()
 
-
     direction = menu_options.pick_left_or_right(53)
     if (direction == 'left'):
         menu_options.start_game()
