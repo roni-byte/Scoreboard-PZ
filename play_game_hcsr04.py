@@ -2,7 +2,7 @@ from machine import Pin, SoftI2C, ADC
 from hcsr04 import HCSR04
 import time
 
-DELAY = 5  # number of seconds between goals
+DELAY = 2  # number of seconds between goals
 push_button_left = Pin(13, Pin.IN)
 push_button_right = Pin(14, Pin.IN)
 
@@ -54,6 +54,6 @@ def who_scored(left=1, right=1):
         # print('Distance R:', distance_right, 'cm')
         # print('Distance L:', distance_left, 'cm')
 
-        time.sleep_ms(200)
+        time.sleep_ms(10)
 
 # print(who_scored())

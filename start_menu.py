@@ -1,20 +1,17 @@
-from machine import Pin, SoftI2C, ADC, mem32
-import machine
+from machine import Pin, SoftI2C, ADC
+import time
 import ssd1306
 from play_game_hcsr04 import who_scored
 from oled1306 import show_single_number, oled1306_print_result
-import buzzer_sounds
 import byte_arrays
-import time
 import leds
-# import stm32lib
+
 
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 
 oled_width = 128
 oled_height = 64
 oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
-buzzer = buzzer_sounds.Buzzer(32)
 num_buffors = [
     byte_arrays.buffer_0, byte_arrays.buffer_1, byte_arrays.buffer_2, byte_arrays.buffer_3, byte_arrays.buffer_4,
     byte_arrays.buffer_5, byte_arrays.buffer_6, byte_arrays.buffer_7, byte_arrays.buffer_8, byte_arrays.buffer_9
@@ -45,31 +42,19 @@ def game_logo():
     clear_screen()
 
 
-def disableADC():
-    # mem32[0x3FF4880C] &= 0xFFF3FFFF
-    # mem32[0x3FF4880C] |= 0x00020000
-    mem32[0x3FF4880C] = 0
-
-
 def where_is_joystick():
     x_center = 1872
     y_center = 1515
-    # adc = machine.ADC(Pin(2))
-    # apin = ADC.channel(pin='GPIO2')
     x = ADC(Pin(15, Pin.IN))
     y = ADC(Pin(2, Pin.IN))
-    # y = apin
+
     x.atten(ADC.ATTN_11DB)
     y.atten(ADC.ATTN_11DB)
 
-    # print(f'Current position: {x_val}, {y_val}')
     x_val = x.read()
     y_val = y.read()
-    x = ADC(0)
-    y = ADC(0)
+    # print('POS: ', x_val, y_val)
 
-    # adc.deinit()
-    # disableADC()
     if (x_val < x_center - 10):
         # print('left')
         return 'left'
@@ -167,42 +152,28 @@ class Menu_options():
         self.points = points
         self.fights = fights
 
-    # def play_sound(self):
-        # if (self.are_sounds_on):
-            # buzzer.play(buzzer_sounds.menu_sound, 200)
-
     def pick_left_or_right(self, height):
         last_placement = ''
         while True:
             placement = where_is_joystick()
             if (placement == 'left'):
-                # buzzer.play(buzzer_sounds.win_song, 200)
                 oled.fill_rect(0, height, 128, 60, 0)
                 oled.text('_____', 10, height-6)
                 oled.show()
-                # if (self.are_sounds_on):
-                # buzzer.play(buzzer_sounds.win_song, 200)
-                # buzzer.play(buzzer_sounds.menu_sound, 200)
-                # self.play_sound()
                 last_placement = placement
             elif (placement == 'right'):
                 oled.fill_rect(0, height, 128, 60, 0)
                 oled.text('_____', 75, height-6)
                 oled.show()
-                # self.play_sound()
                 last_placement = placement
             if (placement == 'down'):
                 if (last_placement == 'left'):
-                    # self.play_sound()
                     return 'left'
                 elif (last_placement == 'right'):
-                    # self.play_sound()
                     return 'right'
                 else:
                     oled.text('you need to pick!', 0, 53)
                     oled.show()
-                    # if (self.are_sounds_on):
-                        # buzzer.play(buzzer_sounds.menu_wrong_sound, 200)
                     time.sleep_ms(1000)
                     oled.fill_rect(0, height, 128, 60, 0)
                     oled.show()
@@ -241,44 +212,43 @@ class Menu_options():
             elif (position == 2):
                 menu()
 
-    def settings(self):
-        clear_screen()
-        oled.text('  SETTINGS', 20, 0)
-        oled.text('MUSIC:  ON', 20, 15)
-        oled.text('SOUNDS: ON', 20, 25)
-        oled.text('EXIT', 20, 35)
-        start_pos_of_pic_rec()
-        oled.show()
-        last_pos = 0
-        while True:
-            position = pick_up_or_down(last_pos, 3)
-            last_pos = position
-            if (position == 0):
-                self.is_music_on = not self.is_music_on
-                oled.fill_rect(80, 15, 30, 10, 0)
-                if (self.is_music_on):
-                    oled.text('ON', 84, 15)
-                    time.sleep_ms(500)
-                else:
-                    oled.text('OFF', 84, 15)
-                    time.sleep_ms(500)
-                oled.show()
-            elif (position == 1):
-                self.are_sounds_on = not self.are_sounds_on
-                oled.fill_rect(80, 25, 30, 10, 0)
-                if (self.are_sounds_on):
-                    oled.text('ON', 84, 25)
-                    time.sleep_ms(500)
-                else:
-                    oled.text('OFF', 84, 25)
-                    time.sleep_ms(500)
-                oled.show()
-            elif (position == 2):
-                menu()
+    # def settings(self):
+    #     clear_screen()
+    #     oled.text('  SETTINGS', 20, 0)
+    #     oled.text('MUSIC:  ON', 20, 15)
+    #     oled.text('SOUNDS: ON', 20, 25)
+    #     oled.text('EXIT', 20, 35)
+    #     start_pos_of_pic_rec()
+    #     oled.show()
+    #     last_pos = 0
+    #     while True:
+    #         position = pick_up_or_down(last_pos, 3)
+    #         last_pos = position
+    #         if (position == 0):
+    #             self.is_music_on = not self.is_music_on
+    #             oled.fill_rect(80, 15, 30, 10, 0)
+    #             if (self.is_music_on):
+    #                 oled.text('ON', 84, 15)
+    #                 time.sleep_ms(500)
+    #             else:
+    #                 oled.text('OFF', 84, 15)
+    #                 time.sleep_ms(500)
+    #             oled.show()
+    #         elif (position == 1):
+    #             self.are_sounds_on = not self.are_sounds_on
+    #             oled.fill_rect(80, 25, 30, 10, 0)
+    #             if (self.are_sounds_on):
+    #                 oled.text('ON', 84, 25)
+    #                 time.sleep_ms(500)
+    #             else:
+    #                 oled.text('OFF', 84, 25)
+    #                 time.sleep_ms(500)
+    #             oled.show()
+    #         elif (position == 2):
+    #             menu()
 
     def start_game(self):
         clear_screen()
-        # buzzer.play(buzzer_sounds.silence, 200)
         oled.text('READY ?', 40, 20)
         oled.text('  YES      NO', 0, 40)
         oled.show()
@@ -294,6 +264,7 @@ class Menu_options():
             for i in range(3, 0, -1):
                 show_single_number(oled, num_buffors[i])
                 leds_types[i % 3].on()
+                print(leds_types[i % 3])
                 time.sleep_ms(1000)
                 leds_types[i % 3].off()
                 time.sleep_ms(1000)
@@ -326,8 +297,6 @@ class Menu_options():
                 clear_screen()
 
         clear_screen()
-        # if (self.are_sounds_on):
-            # buzzer.play(buzzer_sounds.win_song, 200)
         oled.text('GAME OVER', 20, 0)
         oled.text('Winner is player:', 0, 20)
         if (right > left):
@@ -365,7 +334,6 @@ class Menu_options():
             clear_screen()
             oled.text('GOAL !!', 40, 20)
             oled.show()
-            # leds.miga(leds.ledY, 2)
             leds.flash_all_leds()
             time.sleep_ms(500)
             clear_screen()
@@ -377,8 +345,6 @@ class Menu_options():
             oled1306_print_result(oled, num_buffors[left], num_buffors[right])
             time.sleep_ms(500)
         clear_screen()
-        # if (self.are_sounds_on):
-        # buzzer.play(buzzer_sounds.win_song, 200)
         oled.text('FIGHT OVER', 20, 0)
         oled.text('Fight won player:', 0, 20)
         if (right > left):
@@ -393,7 +359,7 @@ class Menu_options():
             oled.text('NONE you tied', 0, 40)
             oled.show()
             leds.miga(leds.ledY, 2)
-        time.sleep_ms(5000)
+        time.sleep_ms(4000)
         clear_screen()
         if (right == max_points):
             return 'right'
@@ -402,35 +368,30 @@ class Menu_options():
         else:
             return 'tie'
 
+
 def menu():
     clear_screen()
     oled.text('  MENU', 20, 0)
     oled.text('GAME MODE', 20, 15)
-    oled.text('SETTINGS', 20, 25)
-    oled.text('RULES', 20, 35)
-    oled.text('CREDITS', 20, 45)
-    oled.text('EXIT', 20, 55)
+    oled.text('RULES', 20, 25)
+    oled.text('CREDITS', 20, 35)
+    oled.text('EXIT', 20, 45)
     start_pos_of_pic_rec()
     oled.show()
     time.sleep_ms(500)
-    position = pick_up_or_down(0, 5)
+    position = pick_up_or_down(0, 4)
     if (position == 0):
         menu_options.game_mode()
     elif (position == 1):
-        menu_options.settings()
-    elif (position == 2):
         show_rules()
-    elif (position == 3):
+    elif (position == 2):
         show_credits()
-    elif (position == 4):
+    elif (position == 3):
         show_beginning_screen()
     time.sleep_ms(7000)
 
 
-
 def show_beginning_screen():
-    # buzzer.play(buzzer_sounds.melody4, 200)
-    # buzzer.play(buzzer_sounds.silence, 200)
     clear_screen()
     oled.text('CAR SOCCER', 25, 0)
     oled.text(' -------------- ', 0, 6)
@@ -450,24 +411,12 @@ def show_beginning_screen():
         menu()
 
 
-# oled.pixel(0, 0, 1)
-# oled.show()
-
-# oled.invert(True)
-
-# game_logo()
-# play_game(3)
-# game_mode()
-# settings()
+game_logo()
 
 menu_options = Menu_options(2, 3)
 # menu_options.start_game()
-# show_beginning_screen()
-# menu_options.play_game(3)
-# buzzer.play(buzzer_sounds.silence, 200)
-buzzer.play(buzzer_sounds.win_song, 200)
-print(where_is_joystick())
-buzzer.play(buzzer_sounds.win_song, 200)
+show_beginning_screen()
+# menu_options.play_games(3, 3)
 
 
 clear_screen()
